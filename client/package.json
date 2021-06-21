@@ -1,0 +1,24 @@
+{
+	"name": "elastic-ruby-client",
+	"description": "VSCode extension connection to Elastic Ruby Server",
+	"author": "Joel Korpela",
+	"license": "MIT",
+	"version": "0.1.0",
+	"publisher": "Blinknlights",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/pheen/elastic_ruby_client"
+	},
+	"engines": {
+		"vscode": "^1.52.0"
+	},
+	"dependencies": {
+		"mz": "^2.7.0",
+		"vscode-languageclient": "^7.0.0"
+	},
+	"devDependencies": {
+		"@types/mz": "^2.7.3",
+		"@types/vscode": "^1.52.0",
+		"vscode-test": "^1.3.0"
+	}
+}
