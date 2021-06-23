@@ -9,9 +9,15 @@
 		"url": "https://github.com/pheen/elastic_ruby_client"
 	},
 	"publisher": "Blinknlights",
-	"categories": ["Programming Languages"],
+	"categories": [
+		"Programming Languages"
+	],
 	"keywords": [
-		"ruby", "language server", "elasticsearch", "elastic_ruby_server", "definition"
+		"ruby",
+		"language server",
+		"elasticsearch",
+		"elastic_ruby_server",
+		"definition"
 	],
 	"engines": {
 		"vscode": "^1.43.0"

@@ -14,14 +14,7 @@ export async function activate(context: ExtensionContext) {
 
   const executable: ServerOptions = {
     command: "docker",
-    args: [
-      "run", "--rm", "-i",
-      "-e", `LOG_LEVEL=${logLevel}`,
-      "-v", `${projectPath}:/project`,
-      "-v", `${volumeName}:/usr/share/elasticsearch/data`,
-      "-w", "/project",
-      image
-    ]
+    args: ["container", "attach", "elastic-ruby-server"]
   };
 
   const clientOptions: LanguageClientOptions = {
@@ -31,10 +24,32 @@ export async function activate(context: ExtensionContext) {
     }
   };
 
+  await pullDockerImage(image);
   await execFile("docker", ["volume", "create", volumeName]);
-  pullDockerImage(image);
+
+  try {
+    // check if the container is already running
+    await execFile("docker", [ "container", "inspect", "elastic-ruby-server" ]);
+  } catch {
+    // it's not running, fire it up!
+    await execFile(
+      "docker",
+      [
+        "run", "--rm", "-i",
+        "--name", "elastic-ruby-server",
+        "-e", `LOG_LEVEL=${logLevel}`,
+        "-v", `${projectPath}:/project`,
+        "-v", `${volumeName}:/usr/share/elasticsearch/data`,
+        "-w", "/project",
+        image
+      ]
+    );
+  }
 
   const client = new LanguageClient("Elastic Ruby Server", executable, clientOptions).start();
+
+  // Push the client to the context's subscriptions so that the
+  // client can be deactivated on extension deactivation
   context.subscriptions.push(client);
 }
 
