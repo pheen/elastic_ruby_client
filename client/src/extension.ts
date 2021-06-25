@@ -2,8 +2,9 @@
 
 import * as vscode from 'vscode';
 import { execFile } from 'mz/child_process';
+import * as net from 'net';
 
-import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { LanguageClient, LanguageClientOptions, ServerOptions, StreamInfo, TransportKind } from 'vscode-languageclient/node';
 import { workspace } from 'vscode';
 
 function delay(ms: number) {
@@ -78,7 +79,7 @@ export async function activate(context: vscode.ExtensionContext) {
   args.push(image);
 
   // console.log("HERE 1");
-  pullImage(image);
+  // pullImage(image);
   // console.log("HERE 2");
 
   const clientOptions: LanguageClientOptions = {
@@ -100,8 +101,35 @@ export async function activate(context: vscode.ExtensionContext) {
     await delay(20 * 1000)
     // console.log("HERE 3.3");
   }
-  const disposable = new LanguageClient("Elastic Ruby Server", executable, clientOptions).start();
-  // console.log("HERE 4");
 
-  context.subscriptions.push(disposable);
+  // const disposable = new LanguageClient("Elastic Ruby Server", executable, clientOptions).start();
+  // // console.log("HERE 4");
+
+  // context.subscriptions.push(disposable);
+
+	let connectionInfo = {
+		port: 5686,
+		host: "localhost"
+  };
+
+	let serverOptions = () => {
+    // Connect to language server via socket
+    let socket = net.connect(connectionInfo);
+    let result: StreamInfo = {
+        writer: socket,
+        reader: socket
+    };
+    return Promise.resolve(result);
+  };
+
+	// Create the language client and start the client.
+	let client = new LanguageClient(
+		'languageServerExample',
+		'Language Server Example',
+		serverOptions,
+		clientOptions
+	);
+
+	// Start the client. This will also launch the server
+	client.start();
 }
