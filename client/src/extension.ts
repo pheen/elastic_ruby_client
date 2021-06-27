@@ -4,15 +4,11 @@ import * as vscode from 'vscode';
 import { execFile } from 'mz/child_process';
 import * as net from 'net';
 
-import { LanguageClient, LanguageClientOptions, ServerOptions, StreamInfo, TransportKind } from 'vscode-languageclient/node';
+import { LanguageClient, LanguageClientOptions, StreamInfo } from 'vscode-languageclient/node';
 import { workspace } from 'vscode';
 
 function delay(ms: number) {
   return new Promise( resolve => setTimeout(resolve, ms) );
-}
-
-function hashCode(s: any) {
-  return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
 }
 
 async function pullImage(image: string) {
@@ -58,29 +54,49 @@ async function pullImage(image: string) {
 export async function activate(context: vscode.ExtensionContext) {
   const conf = vscode.workspace.getConfiguration("elastic-ruby-server");
   let defaultImage = "blinknlights/elastic_ruby_server";
-  let command: string;
-  let args: Array<string>;
   const image = conf["dockerImage"] || defaultImage;
+  const logLevel = conf["logLevel"] || "DEBUG";
 
-  command = "docker";
-  let logLevel = conf["logLevel"] || "DEBUG";
+  const version = "0.2.0";
+  const volumeName = `elastic_ruby_server-${version}`;
+  const containerName = "elastic-ruby-server";
+  const projectsPath = "/Users/joelkorpela/"
 
-  const project_path = vscode.workspace.workspaceFolders[0].uri.path;
+  pullImage(image);
 
-  const volume_name = `elastic_ruby_server-${hashCode(project_path)}`;
+  await execFile("docker", ["volume", "create", volumeName]);
 
-  await execFile("docker", ["volume", "create", volume_name]);
+  try {
+    // check if the container is already running
+    await execFile("docker", [ "container", "top", containerName ]);
+  } catch (error) {
+    // it's not running, fire it up!
+    await execFile(
+      "docker",
+      [
+        "run",
+        "-d",
+        "--rm",
+        "--name", containerName,
+        "--mount", `type=bind,source=${projectsPath},target=/projects,readonly`,
+        "-v", `${volumeName}:/usr/share/elasticsearch/data`,
+        "-p", "8341:8341",
+        "-e", `LOG_LEVEL=${logLevel}`,
+        "-e", `HOST_PROJECTS_ROOT=${projectsPath}`,
+        "-w", "/projects",
+        image
+      ]
+    );
 
-  args = ["run", "--rm", "-i", "-e", `LOG_LEVEL=${logLevel}`, "-v", `${project_path}:/project`, "-v", `${volume_name}:/usr/share/elasticsearch/data`, "-w", "/project"];
-  let additionalGems = conf["additionalGems"];
-  if (additionalGems && additionalGems != "") {
-    args.push("-e", `ADDITIONAL_GEMS=${additionalGems}`)
+    await delay(5 * 1000)
   }
-  args.push(image);
 
-  // console.log("HERE 1");
-  // pullImage(image);
-  // console.log("HERE 2");
+  try {
+    await execFile("docker", [ "container", "top", containerName ]);
+  } catch (error) {
+    // Give it a bit more time, probably will be fine
+    await delay(5 * 1000);
+  }
 
   const clientOptions: LanguageClientOptions = {
     documentSelector: ['ruby'],
@@ -89,32 +105,13 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const executable: ServerOptions = { command, args };
-  // console.log("HERE 3");
-  try {
-    // Try to run a simple docker command
-    await execFile("docker", ["ps"]);
-    // console.log("HERE 3.1");
-  } catch (error) {
-    // If it fails we assume it's starting up - give it time
-    // console.log("HERE 3.2");
-    await delay(20 * 1000)
-    // console.log("HERE 3.3");
-  }
-
-  // const disposable = new LanguageClient("Elastic Ruby Server", executable, clientOptions).start();
-  // // console.log("HERE 4");
-
-  // context.subscriptions.push(disposable);
-
 	let connectionInfo = {
-		port: 5686,
+		port: 8341,
 		host: "localhost"
   };
 
 	let serverOptions = () => {
-    // Connect to language server via socket
-    let socket = net.connect(connectionInfo);
+    let socket = net.connect(connectionInfo); // TCP socket
     let result: StreamInfo = {
         writer: socket,
         reader: socket
@@ -122,14 +119,12 @@ export async function activate(context: vscode.ExtensionContext) {
     return Promise.resolve(result);
   };
 
-	// Create the language client and start the client.
 	let client = new LanguageClient(
-		'languageServerExample',
-		'Language Server Example',
+		"ElasticRubyServer",
+		"Elastic Ruby Server",
 		serverOptions,
 		clientOptions
 	);
 
-	// Start the client. This will also launch the server
 	client.start();
 }
