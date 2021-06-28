@@ -17,20 +17,15 @@ async function pullImage(image: string) {
     try {
       await vscode.window.withProgress({ title: "elastic_ruby_server", location: vscode.ProgressLocation.Window }, async progress => {
         progress.report({ message: `Pulling ${image}` });
-        // console.log('before')
         await execFile("docker", ["pull", image], {});
-        // console.error('after');
         attempts = attempts + 10
       });
     } catch (err) {
       attempts = attempts + 1
       // vscode.window.showErrorMessage(`${err.code}`);
       if (err.code == 1) { // Docker not yet running
-        // console.error('a');
         vscode.window.showErrorMessage('Waiting for docker to start');
-        // console.error('b');
         await delay(10 * 1000);
-        // console.error('c');
       } else {
         if (err.code == "ENOENT") {
           const selected = await vscode.window.showErrorMessage(
@@ -52,19 +47,15 @@ async function pullImage(image: string) {
 }
 
 export async function activate(context: vscode.ExtensionContext) {
-  const conf = vscode.workspace.getConfiguration("elastic-ruby-server");
-  let defaultImage = "blinknlights/elastic_ruby_server";
-  const image = conf["dockerImage"] || defaultImage;
-  const logLevel = conf["logLevel"] || "DEBUG";
+  const image = "blinknlights/elastic_ruby_server";
+
+  const conf = vscode.workspace.getConfiguration("elasticRubyClient");
+  const logLevel = conf["logLevel"] || "error";
+  const projectPaths = conf["projectPaths"] || [];
 
   const version = "0.2.0";
   const volumeName = `elastic_ruby_server-${version}`;
   const containerName = "elastic-ruby-server";
-
-  const projectPaths = [
-    "/Users/joelkorpela/dev",
-    "/Users/joelkorpela/clio"
-  ];
 
   pullImage(image);
 
@@ -142,4 +133,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	);
 
 	client.start();
+}
+
+export function deactivate() {
+  const containerName = "elastic-ruby-server";
+  execFile("docker", [ "stop", containerName ]);
 }

@@ -23,24 +23,25 @@
 	"contributes": {
 		"configuration": {
 			"type": "object",
-			"title": "Example configuration",
+			"title": "Elastic Ruby Client",
 			"properties": {
-				"languageServerExample.maxNumberOfProblems": {
-					"scope": "resource",
-					"type": "number",
-					"default": 100,
-					"description": "Controls the maximum number of problems produced by the server."
+				"elasticRubyClient.projectPaths": {
+					"scope": "window",
+					"type": "array",
+					"default": [],
+					"description": "A list of paths that will be mounted, as readonly, when starting the server's docker container. A directory must be apart of the list or a sub-directory of a path in the list for the server to be able to read the file."
 				},
-				"languageServerExample.trace.server": {
+				"elasticRubyClient.logLevel": {
 					"scope": "window",
 					"type": "string",
 					"enum": [
-						"off",
-						"messages",
-						"verbose"
+						"error",
+						"warn",
+						"info",
+						"debug"
 					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the language server."
+					"default": "error",
+					"description": "Controls the logging level for the server. Logs are sent to the STDOUT of the docker container."
 				}
 			}
 		}
