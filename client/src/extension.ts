@@ -60,34 +60,49 @@ export async function activate(context: vscode.ExtensionContext) {
   const version = "0.2.0";
   const volumeName = `elastic_ruby_server-${version}`;
   const containerName = "elastic-ruby-server";
-  const projectsPath = "/Users/joelkorpela/"
+
+  const projectPaths = [
+    "/Users/joelkorpela/dev",
+    "/Users/joelkorpela/clio"
+  ];
 
   pullImage(image);
 
   await execFile("docker", ["volume", "create", volumeName]);
+
+  const mounts = projectPaths.map(path => {
+    return {
+      path: path,
+      name: path.match(/\/([^\/]*?)(\/$|$)/)[1]
+    };
+  });
+
+  let dockerArgs = [
+    "run",
+    "-d",
+    "--rm",
+    "--name", containerName,
+    "-v", `${volumeName}:/usr/share/elasticsearch/data`,
+    "-p", "8341:8341",
+    "-e", `LOG_LEVEL=${logLevel}`,
+    "-e", `HOST_PROJECT_ROOTS="${projectPaths.join(",")}"`
+  ];
+
+  mounts.forEach(mount => {
+    dockerArgs.push(
+      "--mount",
+      `type=bind,source=${mount.path},target=/projects/${mount.name},readonly`
+    );
+  });
+
+  dockerArgs.push(image);
 
   try {
     // check if the container is already running
     await execFile("docker", [ "container", "top", containerName ]);
   } catch (error) {
     // it's not running, fire it up!
-    await execFile(
-      "docker",
-      [
-        "run",
-        "-d",
-        "--rm",
-        "--name", containerName,
-        "--mount", `type=bind,source=${projectsPath},target=/projects,readonly`,
-        "-v", `${volumeName}:/usr/share/elasticsearch/data`,
-        "-p", "8341:8341",
-        "-e", `LOG_LEVEL=${logLevel}`,
-        "-e", `HOST_PROJECTS_ROOT=${projectsPath}`,
-        "-w", "/projects",
-        image
-      ]
-    );
-
+    await execFile("docker", dockerArgs);
     await delay(5 * 1000)
   }
 
