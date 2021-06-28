@@ -1,38 +1,54 @@
-# LSP Example
+# Elastic Ruby Client
 
-Heavily documented sample code for https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+Elastic Ruby Client is a VSCode extension providing a client for [Elastic Ruby Server](https://github.com/pheen/elastic_ruby_server).
 
-## Functionality
+## Installation
 
-This Language Server works for plain text file. It has the following language features:
-- Completions
-- Diagnostics regenerated on each file change or configuration change
+1. Install the extension through VSCode or by cloning this repo to your extensions folder.
 
-It also includes an End-to-End test.
-
-## Structure
+2. Configure `projectPaths` in VSCode's settings. A workspace **must** be a sub-directory of one of these paths for this extension to function.
 
 ```
-.
-├── client // Language Client
-│   ├── src
-│   │   ├── test // End to End tests for Language Client / Server
-│   │   └── extension.ts // Language Client entry point
-├── package.json // The extension manifest.
-└── server // Language Server
-    └── src
-        └── server.ts // Language Server entry point
+"elasticRubyClient.projectPaths": [
+	"/Users/joelkorpela/projects",
+	"/Users/joelkorpela/some_folder/more_projects"
+]
 ```
 
-## Running the Sample
+These paths are mounted as `readonly` when starting the server's docker container:
 
-- Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder
-- Open VS Code on this folder.
-- Press Ctrl+Shift+B to compile the client and server.
-- Switch to the Debug viewlet.
-- Select `Launch Client` from the drop down.
-- Run the launch config.
-- If you want to debug the server as well use the launch configuration `Attach to Server`
-- In the [Extension Development Host] instance of VSCode, open a document in 'plain text' language mode.
-  - Type `j` or `t` to see `Javascript` and `TypeScript` completion.
-  - Enter text content such as `AAA aaa BBB`. The extension will emit diagnostics for all words in all-uppercase.
+*Note: do not use your home directory as a path or docker will use a large amount of CPU %.*
+
+3. Navigate to the extension folder:
+
+```bash
+cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-0.2.1/
+```
+
+4. Install dependencies:
+
+```
+npm install
+```
+
+5. Reload VSCode and navigate to a *.rb file to activate the extension.
+- The docker image may take a few minutes to download. It's about ~360mb.
+- Once the docker image is downloaded it will boot and start indexing.
+- Large projects can take take a few minutes to scan. Files are indexed at about 1000 files/minute on my machine.
+
+## Usage
+
+#### Go To Definition
+
+Go to definition can be activated with `cmd + click`, `f12`, or by setting a new keybind for `Go to Definition` in VSCode (`cmd + g`, for example).
+
+#### Workspace symbol lookup
+
+Workspace Symbol Lookup is activated with `cmd + t`. Modules, classes, and method definitions for the entire project can be searched.
+
+## Contributing
+
+This project is still early in development, but I would be stoked for any help!
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
