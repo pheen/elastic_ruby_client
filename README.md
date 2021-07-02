@@ -22,7 +22,7 @@ These paths are mounted as `readonly` when starting the server's docker containe
 3. Navigate to the extension folder:
 
 ```bash
-cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-0.2.1/
+cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-0.2.6/
 ```
 
 4. Install dependencies:
