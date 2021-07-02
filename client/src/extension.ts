@@ -113,28 +113,28 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-	let connectionInfo = {
-		port: 8341,
-		host: "localhost"
+  let connectionInfo = {
+    port: 8341,
+    host: "localhost"
   };
 
-	let serverOptions = () => {
+  let serverOptions = () => {
     let socket = net.connect(connectionInfo); // TCP socket
     let result: StreamInfo = {
-        writer: socket,
-        reader: socket
+      writer: socket,
+      reader: socket
     };
     return Promise.resolve(result);
   };
 
-	let client = new LanguageClient(
-		"ElasticRubyServer",
-		"Elastic Ruby Server",
-		serverOptions,
-		clientOptions
-	);
+  let client = new LanguageClient(
+    "ElasticRubyServer",
+    "Elastic Ruby Server",
+    serverOptions,
+    clientOptions
+  );
 
-	client.start();
+  client.start();
 }
 
 // export function deactivate() {
