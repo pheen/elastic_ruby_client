@@ -4,28 +4,28 @@ Elastic Ruby Client is a VSCode extension providing a client for [Elastic Ruby S
 
 ## Installation
 
-1. Install the extension through VSCode
+**1.** Install the extension through VSCode
 
-2. Configure `projectPaths` in VSCode's settings. A workspace **must** be a sub-directory of one of these paths for this extension to function.
+**2.** Configure `projectPaths` in VSCode's settings. A workspace **must** be a sub-directory of one of these paths for this extension to function.
 
 ```
 "elasticRubyClient.projectPaths": [
-	"/Users/joelkorpela/projects",
-	"/Users/joelkorpela/some_folder/more_projects"
+	"/Users/<name>/projects",
+	"/Users/<name>/a_folder/more_projects"
 ]
 ```
 
-These paths are mounted as `readonly` when starting the server's docker container:
+- These paths are mounted as `readonly` when starting the server's docker container:
 
-*Note: do not use your home directory as a path or docker will use a large amount of CPU %.*
+- *Note: do not use your home directory as a path or docker will use a large amount of CPU %.*
 
-3. Navigate to the extension folder:
+**3.** Navigate to the extension folder:
 
 ```bash
 cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-0.2.6/
 ```
 
-4. Install dependencies:
+**4.** Install dependencies:
 
 ```
 npm install
@@ -33,7 +33,7 @@ npm install
 
 *Note: dependencies need to be installed again when a new version is installed.*
 
-5. Reload VSCode and navigate to a *.rb file to activate the extension.
+**5.** Reload VSCode and navigate to a *.rb file to activate the extension.
 - The docker image may take a few minutes to download. It's about ~360mb.
 - Once the docker image is downloaded it will boot and start indexing.
 - Large projects can take take a few minutes to scan. Files are indexed at about 1000 files/minute on my machine.
