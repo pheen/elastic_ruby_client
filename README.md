@@ -48,6 +48,21 @@ Go to definition can be activated with `cmd + click`, `f12`, or by setting a new
 
 Workspace Symbol Lookup is activated with `cmd + t`. Modules, classes, and method definitions for the entire project can be searched.
 
+## Configuration
+
+- `"elasticRubyClient.projectPaths"` sets the paths the extension has access to search for workspace directories:
+```
+"elasticRubyClient.projectPaths": [
+	"/Users/<name>/projects",
+	"/Users/<name>/a_folder/more_projects"
+]
+```
+
+- `"elasticRubyClient.port"` if you need to change the port. The default is `8341`.
+```
+"elasticRubyClient.port": 1234
+```
+
 ## Troubleshooting
 
 - Repeat Installation steps 3 and 4 to install the extension's dependencies. This needs to be done again if a new version of the extension is installed.
