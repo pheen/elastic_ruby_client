@@ -4,7 +4,7 @@
 	"description": "VSCode extension providing a client for Elastic Ruby Server",
 	"author": "Joel Korpela",
 	"license": "MIT",
-	"version": "0.2.4",
+	"version": "0.2.5",
 	"publisher": "Blinknlights",
 	"repository": {
 		"type": "git",

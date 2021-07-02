@@ -74,7 +74,7 @@ export async function activate(context: vscode.ExtensionContext) {
     "-d",
     "--rm",
     "--name", containerName,
-    // todo: add -m flag to limit memory
+    "--ulimit", "memlock=-1:-1",
     "-v", `${volumeName}:/usr/share/elasticsearch/data`,
     "-p", `${port}:${port}`,
     "-e", `LOG_LEVEL=${logLevel}`,
