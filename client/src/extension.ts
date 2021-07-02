@@ -47,11 +47,12 @@ async function pullImage(image: string) {
 }
 
 export async function activate(context: vscode.ExtensionContext) {
-  const image = "blinknlights/elastic_ruby_server";
-
   const conf = vscode.workspace.getConfiguration("elasticRubyClient");
+
+  const image = conf["image"] || "blinknlights/elastic_ruby_server";
   const logLevel = conf["logLevel"] || "error";
   const projectPaths = conf["projectPaths"] || [];
+  const port = conf["port"] || 8341; // todo: add to package.json
 
   const version = "0.2.0";
   const volumeName = `elastic_ruby_server-${version}`;
@@ -73,8 +74,9 @@ export async function activate(context: vscode.ExtensionContext) {
     "-d",
     "--rm",
     "--name", containerName,
+    // todo: add -m flag to limit memory
     "-v", `${volumeName}:/usr/share/elasticsearch/data`,
-    "-p", "8341:8341",
+    "-p", `${port}:${port}`,
     "-e", `LOG_LEVEL=${logLevel}`,
     "-e", `HOST_PROJECT_ROOTS="${projectPaths.join(",")}"`
   ];
@@ -135,7 +137,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	client.start();
 }
 
-export function deactivate() {
-  const containerName = "elastic-ruby-server";
-  execFile("docker", [ "stop", containerName ]);
-}
+// export function deactivate() {
+//   const containerName = "elastic-ruby-server";
+//   execFile("docker", [ "stop", containerName ]);
+// }
