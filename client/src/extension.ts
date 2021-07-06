@@ -169,7 +169,7 @@ export async function activate(context: vscode.ExtensionContext, reactivating = 
     containerName: "elastic-ruby-server"
   }
 
-  // pullImage(settings.image);
+  pullImage(settings.image);
   await createVolume(settings.volumeName);
   await startContainer(settings);
 
