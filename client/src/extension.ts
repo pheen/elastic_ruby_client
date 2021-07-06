@@ -1,14 +1,73 @@
-'use strict';
+"use strict";
 
-import * as vscode from 'vscode';
-import { execFile } from 'mz/child_process';
-import * as net from 'net';
+import * as vscode from "vscode";
+import { execFile } from "mz/child_process";
+import * as net from "net";
 
-import { LanguageClient, LanguageClientOptions, StreamInfo } from 'vscode-languageclient/node';
-import { workspace } from 'vscode';
+import { LanguageClient, LanguageClientOptions, StreamInfo } from "vscode-languageclient/node";
+import { workspace } from "vscode";
 
 function delay(ms: number) {
   return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
+function bindCustomEvents(client: LanguageClient, context: vscode.ExtensionContext, settings) {
+  let disposables = []
+
+	disposables.push(
+    vscode.commands.registerCommand("elasticRubyClient.reindexWorkspace", () => {
+      vscode.window.withProgress({ title: "Elastic Ruby Client", location: vscode.ProgressLocation.Window }, async progress => {
+        progress.report({ message: "Reindexing workspace..." });
+        client.sendNotification("workspace/reindex");
+      });
+    })
+  );
+
+	disposables.push(
+    vscode.commands.registerCommand("elasticRubyClient.stopServer", () => {
+      vscode.window.withProgress({ title: "Elastic Ruby Client", location: vscode.ProgressLocation.Window }, async progress => {
+        progress.report({ message: "Stopping server..." });
+        execFile("docker", [ "stop", settings.containerName ]);
+      });
+    })
+  );
+
+  for (let disposable of disposables) {
+    context.subscriptions.push(disposable);
+  }
+}
+
+function buildContainerArgs(settings) {
+  let dockerArgs = [
+    "run",
+    "-d",
+    "--rm",
+    "--name", settings.containerName,
+    "--ulimit", "memlock=-1:-1",
+    "-v", `${settings.volumeName}:/usr/share/elasticsearch/data`,
+    "-p", `${settings.port}:${settings.port}`,
+    "-e", `SERVER_PORT=${settings.port}`,
+    "-e", `LOG_LEVEL=${settings.logLevel}`,
+    "-e", `HOST_PROJECT_ROOTS="${settings.projectPaths.join(",")}"`
+  ];
+
+  const mounts = settings.projectPaths.map(path => {
+    return {
+      path: path,
+      name: path.match(/\/([^\/]*?)(\/$|$)/)[1]
+    };
+  });
+
+  mounts.forEach(mount => {
+    dockerArgs.push(
+      "--mount",
+      `type=bind,source=${mount.path},target=/projects/${mount.name},readonly`
+    );
+  });
+
+  dockerArgs.push(settings.image);
+
+  return dockerArgs;
 }
 
 async function pullImage(image: string) {
@@ -24,102 +83,57 @@ async function pullImage(image: string) {
       attempts = attempts + 1
       // vscode.window.showErrorMessage(`${err.code}`);
       if (err.code == 1) { // Docker not yet running
-        vscode.window.showErrorMessage('Waiting for docker to start');
+        vscode.window.showErrorMessage("Waiting for docker to start");
         await delay(10 * 1000);
       } else {
         if (err.code == "ENOENT") {
           const selected = await vscode.window.showErrorMessage(
-            'Docker executable not found. Install Docker.',
+            "Docker executable not found. Install Docker.",
             { modal: true },
-            'Open settings'
+            "Open settings"
             );
-            if (selected === 'Open settings') {
-              await vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
+            if (selected === "Open settings") {
+              await vscode.commands.executeCommand("workbench.action.openWorkspaceSettings");
             }
         } else {
-          vscode.window.showErrorMessage('Error updating docker image! - will try to use existing local one: ' + err.message);
+          vscode.window.showErrorMessage("Error updating docker image! - will try to use existing local one: " + err.message);
           console.error(err);
         }
       }
-
     }
   }
 }
 
-export async function activate(context: vscode.ExtensionContext) {
-  const conf = vscode.workspace.getConfiguration("elasticRubyClient");
+async function createVolume(volumeName: string) {
+  await execFile("docker", ["volume", "create",volumeName]);
+}
 
-  const image = conf["image"] || "blinknlights/elastic_ruby_server";
-  const logLevel = conf["logLevel"] || "error";
-  const projectPaths = conf["projectPaths"] || [];
-  const port = conf["port"] || 8341; // todo: add to package.json
-
-  const version = "0.2.0";
-  const volumeName = `elastic_ruby_server-${version}`;
-  const containerName = "elastic-ruby-server";
-
-  pullImage(image);
-
-  await execFile("docker", ["volume", "create", volumeName]);
-
-  const mounts = projectPaths.map(path => {
-    return {
-      path: path,
-      name: path.match(/\/([^\/]*?)(\/$|$)/)[1]
-    };
-  });
-
-  let dockerArgs = [
-    "run",
-    "-d",
-    "--rm",
-    "--name", containerName,
-    "--ulimit", "memlock=-1:-1",
-    "-v", `${volumeName}:/usr/share/elasticsearch/data`,
-    "-p", `${port}:${port}`,
-    "-e", `LOG_LEVEL=${logLevel}`,
-    "-e", `HOST_PROJECT_ROOTS="${projectPaths.join(",")}"`
-  ];
-
-  mounts.forEach(mount => {
-    dockerArgs.push(
-      "--mount",
-      `type=bind,source=${mount.path},target=/projects/${mount.name},readonly`
-    );
-  });
-
-  dockerArgs.push(image);
-
+async function startContainer(settings) {
+  // todo: cleanup this function
   try {
     // check if the container is already running
-    await execFile("docker", [ "container", "top", containerName ]);
+    await execFile("docker", [ "container", "top", settings.containerName ]);
   } catch (error) {
     // it's not running, fire it up!
-    await execFile("docker", dockerArgs);
+    await execFile("docker", buildContainerArgs(settings));
+
     await delay(5 * 1000)
   }
 
   try {
-    await execFile("docker", [ "container", "top", containerName ]);
+    await execFile("docker", [ "container", "top", settings.containerName ]);
   } catch (error) {
     // Give it a bit more time, probably will be fine
     await delay(5 * 1000);
   }
+}
 
-  const clientOptions: LanguageClientOptions = {
-    documentSelector: ['ruby'],
-    synchronize: {
-      fileEvents: workspace.createFileSystemWatcher('**/*.rb')
-    }
-  };
-
-  let connectionInfo = {
-    port: 8341,
-    host: "localhost"
-  };
-
+function buildLanguageClient(settings) {
   let serverOptions = () => {
-    let socket = net.connect(connectionInfo); // TCP socket
+    let socket = net.connect({
+      port: settings.port,
+      host: "localhost"
+    });
     let result: StreamInfo = {
       writer: socket,
       reader: socket
@@ -127,17 +141,40 @@ export async function activate(context: vscode.ExtensionContext) {
     return Promise.resolve(result);
   };
 
-  let client = new LanguageClient(
+  const clientOptions: LanguageClientOptions = {
+    documentSelector: ["ruby"],
+    synchronize: {
+      fileEvents: workspace.createFileSystemWatcher("**/*.rb")
+    }
+  };
+
+  return new LanguageClient(
     "ElasticRubyServer",
     "Elastic Ruby Server",
     serverOptions,
     clientOptions
   );
-
-  client.start();
 }
 
-// export function deactivate() {
-//   const containerName = "elastic-ruby-server";
-//   execFile("docker", [ "stop", containerName ]);
-// }
+export async function activate(context: vscode.ExtensionContext, reactivating = false) {
+  if (!workspace.workspaceFolders) { return; }
+
+  const conf = vscode.workspace.getConfiguration("elasticRubyClient");
+  const settings = {
+    image:         conf["image"] || "blinknlights/elastic_ruby_server",
+    projectPaths:  conf["projectPaths"],
+    port:          conf["port"],
+    logLevel:      conf["logLevel"],
+    volumeName:    `elastic_ruby_server-0.2.0`,
+    containerName: "elastic-ruby-server"
+  }
+
+  // pullImage(settings.image);
+  await createVolume(settings.volumeName);
+  await startContainer(settings);
+
+  const client = buildLanguageClient(settings);
+
+  client.start();
+  bindCustomEvents(client, context, settings);
+}

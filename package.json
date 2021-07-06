@@ -22,6 +22,16 @@
 	],
 	"main": "./client/out/extension",
 	"contributes": {
+		"commands": [
+			{
+					"command": "elasticRubyClient.reindexWorkspace",
+					"title": "Elastic Ruby Client: Reindex Workspace"
+			},
+			{
+				"command": "elasticRubyClient.stopServer",
+				"title": "Elastic Ruby Client: Stop Server"
+			}
+		],
 		"configuration": {
 			"type": "object",
 			"title": "Elastic Ruby Client",
@@ -31,6 +41,12 @@
 					"type": "array",
 					"default": [],
 					"description": "A list of paths that will be mounted, as readonly, when starting the server's docker container. A directory must be apart of the list or a sub-directory of a path in the list for the server to be able to read the file."
+				},
+				"elasticRubyClient.port": {
+					"scope": "window",
+					"type": "integer",
+					"default": 8341,
+					"description": "The port used by the client and server."
 				},
 				"elasticRubyClient.logLevel": {
 					"scope": "window",
