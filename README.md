@@ -22,7 +22,7 @@ Elastic Ruby Client is a VSCode extension providing a client for [Elastic Ruby S
 **3.** Navigate to the extension folder:
 
 ```bash
-cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-0.3.0/
+cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-0.3.1/
 ```
 
 **4.** Install dependencies:
