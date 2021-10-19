@@ -1,10 +1,10 @@
 {
 	"name": "elastic-ruby-client",
-	"displayName": "Elastic Ruby Client",
-	"description": "VSCode extension providing a client for Elastic Ruby Server",
+	"displayName": "Elastic Ruby Server",
+	"description": "Elastic Ruby Server is a Ruby language server with persistent storage backed by Elasticsearch",
 	"author": "Joel Korpela",
 	"license": "MIT",
-	"version": "0.3.1",
+	"version": "0.5.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/pheen/elastic_ruby_client"
@@ -12,7 +12,7 @@
 	"publisher": "Blinknlights",
 	"categories": ["Programming Languages"],
 	"keywords": [
-		"ruby", "language", "server", "elastic", "client", "definition", "goto"
+		"ruby", "language", "server", "elastic", "definition", "goto"
 	],
 	"engines": {
 		"vscode": "^1.43.0"
@@ -24,31 +24,31 @@
 	"contributes": {
 		"commands": [
 			{
-					"command": "elasticRubyClient.reindexWorkspace",
-					"title": "Elastic Ruby Client: Reindex Workspace"
+					"command": "elasticRubyServer.reindexWorkspace",
+					"title": "Elastic Ruby Server: Reindex Workspace"
 			},
 			{
-				"command": "elasticRubyClient.stopServer",
-				"title": "Elastic Ruby Client: Stop Server"
+				"command": "elasticRubyServer.stopServer",
+				"title": "Elastic Ruby Server: Stop Server"
 			}
 		],
 		"configuration": {
 			"type": "object",
-			"title": "Elastic Ruby Client",
+			"title": "Elastic Ruby Server",
 			"properties": {
-				"elasticRubyClient.projectPaths": {
+				"elasticRubyServer.projectPaths": {
 					"scope": "window",
 					"type": "array",
 					"default": [],
 					"description": "A list of paths that will be mounted, as readonly, when starting the server's docker container. A directory must be apart of the list or a sub-directory of a path in the list for the server to be able to read the file."
 				},
-				"elasticRubyClient.port": {
+				"elasticRubyServer.port": {
 					"scope": "window",
 					"type": "integer",
 					"default": 8341,
 					"description": "The port used by the client and server."
 				},
-				"elasticRubyClient.logLevel": {
+				"elasticRubyServer.logLevel": {
 					"scope": "window",
 					"type": "string",
 					"enum": [

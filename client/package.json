@@ -1,10 +1,10 @@
 {
 	"name": "elastic-ruby-client",
-	"displayName": "Elastic Ruby Client",
-	"description": "VSCode extension providing a client for Elastic Ruby Server",
+	"displayName": "Elastic Ruby Server",
+	"description": "Elastic Ruby Server is a Ruby language server with persistent storage backed by Elasticsearch",
 	"author": "Joel Korpela",
 	"license": "MIT",
-	"version": "0.3.1",
+	"version": "0.5.0",
 	"publisher": "Blinknlights",
 	"repository": {
 		"type": "git",

@@ -15,7 +15,7 @@ function bindCustomEvents(client: LanguageClient, context: vscode.ExtensionConte
   let disposables = []
 
 	disposables.push(
-    vscode.commands.registerCommand("elasticRubyClient.reindexWorkspace", () => {
+    vscode.commands.registerCommand("elasticRubyServer.reindexWorkspace", () => {
       vscode.window.withProgress({ title: "Elastic Ruby Client", location: vscode.ProgressLocation.Window }, async progress => {
         progress.report({ message: "Reindexing workspace..." });
         client.sendNotification("workspace/reindex");
@@ -24,7 +24,7 @@ function bindCustomEvents(client: LanguageClient, context: vscode.ExtensionConte
   );
 
 	disposables.push(
-    vscode.commands.registerCommand("elasticRubyClient.stopServer", () => {
+    vscode.commands.registerCommand("elasticRubyServer.stopServer", () => {
       vscode.window.withProgress({ title: "Elastic Ruby Client", location: vscode.ProgressLocation.Window }, async progress => {
         progress.report({ message: "Stopping server..." });
         execFile("docker", [ "stop", settings.containerName ]);
@@ -159,7 +159,7 @@ function buildLanguageClient(settings) {
 export async function activate(context: vscode.ExtensionContext, reactivating = false) {
   if (!workspace.workspaceFolders) { return; }
 
-  const conf = vscode.workspace.getConfiguration("elasticRubyClient");
+  const conf = vscode.workspace.getConfiguration("elasticRubyServer");
   const settings = {
     image:         conf["image"] || "blinknlights/elastic_ruby_server",
     projectPaths:  conf["projectPaths"],
