@@ -34,7 +34,7 @@
 
 **3.** Install dependencies needed for the extension to interact with docker:
 ```bash
-> cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-0.5.0/
+> cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-0.5.1/
 > npm install
 ```
 
