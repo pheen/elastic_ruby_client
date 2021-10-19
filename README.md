@@ -1,6 +1,6 @@
 # Elastic Ruby Server
 
-Elastic Ruby Server is a Ruby language server with persistent storage backed by Elasticsearch.
+[Elastic Ruby Server](https://github.com/pheen/elastic_ruby_server) is a Ruby language server with persistent storage backed by Elasticsearch.
 
 ## Features & Usage
 ##### - Workspace symbol lookup
@@ -21,6 +21,7 @@ Elastic Ruby Server is a Ruby language server with persistent storage backed by 
 
 ## Installation
 **1.** Install Docker if needed and the `Elastic Ruby Server` extension
+
 **2.** Configure `elasticRubyServer.projectPaths`. **Important:** A project must be a sub-directory of one of these paths to be readable by the langue server.
 - Configure in VSCode's JSON settings (`cmd + shift + p` and search for `Preferences: Open Settings (JSON)`).
 - Don't use your home directory a path or docker will use a large amount of CPU %.
@@ -38,6 +39,7 @@ Elastic Ruby Server is a Ruby language server with persistent storage backed by 
 ```
 
 **5.** Reload VSCode
+
 **6.** Navigate to any `.rb` file to activate the extension.
 
 The extension will automatically start indexing a workspace when activated.
@@ -67,9 +69,6 @@ Definitions are searched by storing a `scope` which is built for a given locatio
 
 ## Configuration
 - `elasticRubyServer.port`. The default is `8341`.
-```
-"elasticRubyServer.port": 1234
-```
 
 ## Troubleshooting
 - Check that the container is running. The image name is `blinknlights/elastic_ruby_server` which is ran with the name `elastic-ruby-server`. You could check with `docker ps` or in the Docker app:
