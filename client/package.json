@@ -4,19 +4,19 @@
 	"description": "Elastic Ruby Server is a Ruby language server with persistent storage backed by Elasticsearch",
 	"author": "Joel Korpela",
 	"license": "MIT",
-	"version": "0.5.1",
+	"version": "0.9.0",
 	"publisher": "Blinknlights",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/pheen/elastic_ruby_client"
 	},
 	"engines": {
-		"vscode": "^1.52.0"
+		"vscode": "^1.67.0"
 	},
 	"dependencies": {
 		"mz": "^2.7.0",
 		"net": "^1.0.2",
-		"vscode-languageclient": "^7.0.0"
+		"vscode-languageclient": "^8.0.0"
 	},
 	"devDependencies": {
 		"@types/mz": "^2.7.3",

@@ -23,6 +23,15 @@ function bindCustomEvents(client: LanguageClient, context: vscode.ExtensionConte
     })
   );
 
+	// disposables.push(
+  //   vscode.commands.registerCommand("elasticRubyServer.reindexGems", () => {
+  //     vscode.window.withProgress({ title: "Elastic Ruby Client", location: vscode.ProgressLocation.Window }, async progress => {
+  //       progress.report({ message: "Reindexing gems..." });
+  //       client.sendNotification("workspace/reindexGems");
+  //     });
+  //   })
+  // );
+
 	disposables.push(
     vscode.commands.registerCommand("elasticRubyServer.stopServer", () => {
       vscode.window.withProgress({ title: "Elastic Ruby Client", location: vscode.ProgressLocation.Window }, async progress => {
@@ -49,6 +58,8 @@ function buildContainerArgs(settings) {
     "-e", `SERVER_PORT=${settings.port}`,
     "-e", `LOG_LEVEL=${settings.logLevel}`,
     "-e", `HOST_PROJECT_ROOTS="${settings.projectPaths.join(",")}"`
+    // "-e", `HOST_PROJECT_ROOTS="${settings.projectPaths.join(",")}"`,
+    // "-e", `GEMS_PATH="/Users/joelkorpela/.rbenv/versions/"`
   ];
 
   const mounts = settings.projectPaths.map(path => {
@@ -61,9 +72,15 @@ function buildContainerArgs(settings) {
   mounts.forEach(mount => {
     dockerArgs.push(
       "--mount",
-      `type=bind,source=${mount.path},target=/projects/${mount.name},readonly`
+      // `type=bind,source=${mount.path},target=/projects/${mount.name},readonly`
+      `type=bind,source=${mount.path},target=/projects/${mount.name}`
     );
   });
+
+  // dockerArgs.push(
+  //   "--mount",
+  //   `type=bind,source=/Users/joelkorpela/.rbenv/versions/,target=/gems/,readonly`
+  // );
 
   dockerArgs.push(settings.image);
 
@@ -105,7 +122,7 @@ async function pullImage(image: string) {
 }
 
 async function createVolume(volumeName: string) {
-  await execFile("docker", ["volume", "create",volumeName]);
+  await execFile("docker", ["volume", "create", volumeName]);
 }
 
 async function startContainer(settings) {
@@ -128,23 +145,25 @@ async function startContainer(settings) {
   }
 }
 
-function buildLanguageClient(settings) {
+function buildLanguageClient(port) {
   let serverOptions = () => {
     let socket = net.connect({
-      port: settings.port,
+      port: port,
       host: "localhost"
     });
     let result: StreamInfo = {
       writer: socket,
       reader: socket
     };
+
     return Promise.resolve(result);
   };
 
   const clientOptions: LanguageClientOptions = {
     documentSelector: ["ruby"],
     synchronize: {
-      fileEvents: workspace.createFileSystemWatcher("**/*.rb")
+      // fileEvents: workspace.createFileSystemWatcher("**/*.rb")
+      fileEvents: null
     }
   };
 
@@ -156,16 +175,27 @@ function buildLanguageClient(settings) {
   );
 }
 
+let client: LanguageClient;
+let statusBarItem: vscode.StatusBarItem;
+
 export async function activate(context: vscode.ExtensionContext, reactivating = false) {
   if (!workspace.workspaceFolders) { return; }
+
+  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, -100);
+  context.subscriptions.push(statusBarItem);
+
+  statusBarItem.text = `$(ruby)`;
+  // statusBarItem.tooltip = ``
+  statusBarItem.show();
 
   const conf = vscode.workspace.getConfiguration("elasticRubyServer");
   const settings = {
     image:         conf["image"] || "blinknlights/elastic_ruby_server",
+    // image:         conf["image"] || "elastic_ruby_server",
     projectPaths:  conf["projectPaths"],
     port:          conf["port"],
     logLevel:      conf["logLevel"],
-    volumeName:    `elastic_ruby_server-0.2.0`,
+    volumeName:    `elastic_ruby_server-9.0.0`,
     containerName: "elastic-ruby-server"
   }
 
@@ -173,8 +203,13 @@ export async function activate(context: vscode.ExtensionContext, reactivating = 
   await createVolume(settings.volumeName);
   await startContainer(settings);
 
-  const client = buildLanguageClient(settings);
+  client = buildLanguageClient(settings.port);
 
-  client.start();
   bindCustomEvents(client, context, settings);
+
+  client.start().catch((error)=> client.error(`Start failed`, error, 'force'));
+}
+
+export function deactivate() {
+	return client.stop();
 }
