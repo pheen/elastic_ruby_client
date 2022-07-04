@@ -2,9 +2,10 @@
 	"name": "elastic-ruby-client",
 	"displayName": "Elastic Ruby Server",
 	"description": "Elastic Ruby Server is a Ruby language server with persistent storage backed by Elasticsearch",
+	"icon": "images/icon.png",
 	"author": "Joel Korpela",
 	"license": "MIT",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/pheen/elastic_ruby_client"
