@@ -5,7 +5,7 @@
 	"icon": "images/icon.png",
 	"author": "Joel Korpela",
 	"license": "MIT",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/pheen/elastic_ruby_client"
