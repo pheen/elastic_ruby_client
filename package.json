@@ -35,10 +35,6 @@
 				"title": "Elastic Ruby Server: Reindex Workspace"
 			},
 			{
-				"command": "elasticRubyServer.reindexGems",
-				"title": "Elastic Ruby Server: Reindex Gems"
-			},
-			{
 				"command": "elasticRubyServer.stopServer",
 				"title": "Elastic Ruby Server: Stop Server"
 			}
