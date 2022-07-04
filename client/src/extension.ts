@@ -14,6 +14,19 @@ function delay(ms: number) {
 function bindCustomEvents(client: LanguageClient, context: vscode.ExtensionContext, settings) {
   let disposables = []
 
+  client.onNotification("workspace/elasticRubyServerBusy", (params) => {
+    console.log("received status:")
+    console.log(params)
+
+    if (params.busy == "true") {
+      statusBarItem.color = "#781720";
+      statusBarItem.tooltip = `${params.tooltip}`;
+    } else {
+      statusBarItem.color = undefined;
+      statusBarItem.tooltip = ``;
+    }
+  });
+
 	disposables.push(
     vscode.commands.registerCommand("elasticRubyServer.reindexWorkspace", () => {
       vscode.window.withProgress({ title: "Elastic Ruby Client", location: vscode.ProgressLocation.Window }, async progress => {
@@ -185,12 +198,13 @@ export async function activate(context: vscode.ExtensionContext, reactivating = 
   context.subscriptions.push(statusBarItem);
 
   statusBarItem.text = `$(ruby)`;
-  // statusBarItem.tooltip = ``
+  statusBarItem.color = undefined;
+  statusBarItem.tooltip = ``
   statusBarItem.show();
 
   const conf = vscode.workspace.getConfiguration("elasticRubyServer");
   const settings = {
-    image:         conf["image"] || "blinknlights/elastic_ruby_server",
+    image: conf["image"] || "blinknlights/elastic_ruby_server:1.0",
     // image:         conf["image"] || "elastic_ruby_server",
     projectPaths:  conf["projectPaths"],
     port:          conf["port"],
