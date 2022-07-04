@@ -4,7 +4,7 @@
 	"description": "Elastic Ruby Server is a Ruby language server with persistent storage backed by Elasticsearch",
 	"author": "Joel Korpela",
 	"license": "MIT",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"publisher": "Blinknlights",
 	"repository": {
 		"type": "git",

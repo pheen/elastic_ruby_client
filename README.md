@@ -21,7 +21,7 @@ A Ruby language server with persistent storage backed by Elasticsearch. The goal
 
 **3.** Install the dependencies needed for the extension to interact with Docker:
 ```bash
-> cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-1.0.0/
+> cd ~/.vscode/extensions/blinknlights.elastic-ruby-client-1.0.2/
 > npm install
 ```
 
